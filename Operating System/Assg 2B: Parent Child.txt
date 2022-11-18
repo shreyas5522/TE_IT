@@ -1,0 +1,113 @@
+       ///////////1. Parent
+
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <pthread.h>
+
+void asc(int *a, int n, char **b)
+{
+    int temp;
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = 0; j < n - 1 - i; j++)
+        {
+            if (a[j] > a[j + 1])
+            {
+                char *ch = b[j];
+                b[j] = b[j + 1];
+                b[j + 1] = ch;
+                temp = a[j];
+                a[j] = a[j + 1];
+                a[j + 1] = temp;
+            }
+        }
+    }
+}
+int main(int argc, char *argv[], char *envp[])
+{
+    pid_t pid;
+    int no_elements = argc - 1;
+    int a[no_elements];
+    char *args_1[no_elements + 1];
+    int j = 0;
+    for (int i = 1; i <= no_elements; i++)
+    {
+        args_1[j] = argv[i];
+        j++;
+    }
+    args_1[j] = (char *)0;
+    printf("The unsorted integers are\n");
+    for (int i = 0; i < j; i++)
+    {
+        int element = atoi(args_1[i]);
+        a[i] = element;
+        printf("%d\n", atoi(args_1[i]));
+    }
+    printf("Numbers sorted in ascending order\n");
+    asc(a, no_elements, args_1);
+    for (int i = 0; i < no_elements; i++)
+    {
+        printf("%d\n", a[i]);
+    }
+    printf("elements in reverse order\n");
+    for (int i = argc - 1; i >= 0; i--)
+    {
+        int element = atoi(argv[i]);
+        printf("%d\n", a[i]);
+    }
+
+    pid = fork();
+    if (pid == 0)
+    {
+        printf("child\n");
+        execve("./childp", args_1, NULL);
+    }
+    else
+    {
+        wait(NULL);
+    }
+    return 0;
+}
+
+===================================================================
+
+///////// 2.) Child
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+int a[] = {1, 23, 4, 5};
+void asc(int *a, int n)
+{
+    int temp;
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = 0; j < n - 1 - i; j++)
+        {
+            if (a[j] > a[j + 1])
+            {
+                temp = a[j];
+                a[j] = a[j + 1];
+                a[j + 1] = temp;
+            }
+        }
+    }
+}
+int main(int argc, char *argv[], char *envp[])
+{
+    printf("elements in reverse order\n");
+    for (int i = argc - 1; i >= 0; i--)
+    {
+        int element = atoi(argv[i]);
+        printf("%d\n", a[i]);
+    }
+
+    return 0;
+}
+
